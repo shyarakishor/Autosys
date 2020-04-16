@@ -1,0 +1,18 @@
+---
+header_title: Title
+summary_file: /home/dell/Work/mohan/DBSpaceUtilization/Autosys/CSV/autosys_summary.csv
+detail_file: /home/dell/Work/mohan/DBSpaceUtilization/Autosys/CSV/autosys_details.csv
+
+footer:
+  text: "Footer"
+  style: bold
+  size: 14pt
+  color: red
+detail_fields:
+  field1: "Job Name"
+  field2: "State Date"
+  field3: "Start Time"
+  field4: "End Date"
+  field5: "End Time"
+  field6: "Job Status"
+
