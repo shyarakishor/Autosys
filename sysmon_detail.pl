@@ -49,8 +49,10 @@ my $footer_hash  = $filedata->{footer};
 
 ####Read CSV File and Collect Lines
 my $csv_lines = [];
+my $header_line = '';
 my $fh = FileHandle->new;
 if ( $fh->open("< $csv_file") ) {
+	# $header_line = $fh->getline();
 	while (my $line = $fh->getline()) {
 		chomp($line);
 		push @$csv_lines, $line;
@@ -61,6 +63,18 @@ else {
 	print "Cannot open $csv_file"; 
 	die;
 }
+
+##header dynamic
+my $header_html_string = '<tr>';
+if ( $header_line !~ /^\s*$/ ) {
+	my @headers = split(',', $header_line);
+	if ( @headers ) {
+		foreach ( @headers ) {
+			$header_html_string .= '<th>'.$_.'</th>';
+		}
+	}
+}
+$header_html_string .= '</tr>';
 
 ####Read CSV File and Collect Lines END
 

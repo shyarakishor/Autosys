@@ -45,11 +45,14 @@ my $filedata = LoadFile($CONFIG_FILE);
 my $header_title    = $filedata->{header_title};
 my $csv_file        = $filedata->{summary_file};
 my $footer_hash     = $filedata->{footer};
+my $is_anc_tag      = $filedata->{anchor_tag};
 
 ####Read CSV File and Collect Lines
 my $csv_lines = [];
+my $header_line = '';
 my $fh = FileHandle->new;
 if ( $fh->open("< $csv_file") ) {
+	$header_line = $fh->getline();
 	while (my $line = $fh->getline()) {
 		chomp($line);
 		push @$csv_lines, $line;
@@ -61,6 +64,18 @@ else {
 	die;
 }
 
+##header dynamic
+my $header_html_string = '<tr>';
+if ( $header_line !~ /^\s*$/ ) {
+	my @headers = split(',', $header_line);
+	if ( @headers ) {
+		foreach ( @headers ) {
+			$header_html_string .= '<th>'.$_.'</th>';
+		}
+	}
+}
+$header_html_string .= '</tr>';
+
 ####Read CSV File and Collect Lines END
 ##start read and prepare Graph
 my $final_data_array = [];
@@ -71,7 +86,10 @@ if( scalar @$csv_lines ) {
 		$line =~ s/\r|\n//g;
 		next if $line =~ /^\s*$/;
 
-		my ( $server, $status ) = split(',', $line);
+		my @datas = split(',', $line);
+
+		my $server = $datas[0];
+		my $status = $datas[1];
 
 		my $is_green = 1;
 		my $color = '#33cc33';
@@ -80,13 +98,35 @@ if( scalar @$csv_lines ) {
 			$color = '#ff3300';
 		}
 
-		push @$final_data_array, {
-			'server'   => $server,
-			'status'   => $status,
-			'is_green' => $is_green
-		};
-
-		$html_table_string .= '<tr><td><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$server.'</a></td><td style="background-color:'.$color.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$status.'</a></td></tr>';
+		if ( $is_anc_tag =~ /Yes/i ) {
+			if ( @datas ) {
+				$html_table_string .= '<tr>';
+				foreach my $x (@datas) {
+					if ( $x =~ /RED|GREEN/i ) {
+						$html_table_string .= '<td style="background-color:'.$color.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
+					}
+					else {
+						$html_table_string .= '<td><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
+					}
+				}
+				$html_table_string .= '</tr>';
+			}
+		}
+		else {
+			if ( @datas ) {
+				$html_table_string .= '<tr>';
+				foreach my $x (@datas) {
+					if ( $x =~ /RED|GREEN/i ) {
+						$html_table_string .= '<td style="background-color:'.$color.'">'.$x.'</td>';
+					}
+					else {
+						$html_table_string .= '<td>'.$x.'</td>';
+					}
+				}
+				$html_table_string .= '</tr>';
+			}
+			# $html_table_string .= '<tr><td>'.$server.'</td><td style="background-color:'.$color.'">'.$status.'</a></td></tr>';	
+		}
 	}
 }
 
@@ -129,10 +169,7 @@ print <<BODY;
 <p style='margin: 5px 25px 0 25px; color: $footer_hash->{color};font-weight: $footer_hash->{color}; font-size: $footer_hash->{size}'>$header_title</p>
 </div>
 <table align="center">
-  <tr>
-    <th>Server</th>
-    <th>Status</th>
-  </tr>
+  $header_html_string
   $html_table_string
 </table>
 </body>
