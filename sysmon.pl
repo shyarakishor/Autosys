@@ -42,10 +42,16 @@ my $CONFIG_FILE = "$base_dir/resources/$config_file";
 # Load Config Data #######################################	
 my $filedata = LoadFile($CONFIG_FILE);
 
-my $header_title    = $filedata->{header_title};
-my $csv_file        = $filedata->{summary_file};
-my $footer_hash     = $filedata->{footer};
-my $is_anc_tag      = $filedata->{anchor_tag};
+my $header_title  = $filedata->{header_title};
+my $csv_file      = $filedata->{summary_file};
+my $footer_hash   = $filedata->{footer};
+my $is_anc_tag    = $filedata->{anchor_tag};
+my $color_column  = $filedata->{color_column};
+my $color_string1 = $filedata->{color_string1};
+my $color_code1   = $filedata->{color_code1};
+my $color_string2 = $filedata->{color_string2};
+my $color_code2   = $filedata->{color_code2};
+my $key_column    = $filedata->{key_column};
 
 ####Read CSV File and Collect Lines
 my $csv_lines = [];
@@ -88,22 +94,39 @@ if( scalar @$csv_lines ) {
 
 		my @datas = split(',', $line);
 
-		my $server = $datas[0];
-		my $status = $datas[1];
+		# my $server = $datas[0];
+		# my $status = $datas[1];
 
-		my $is_green = 1;
-		my $color = '#33cc33';
-		if ( $status =~ /Red/i ) {
-			$is_green = 0;
-			$color = '#ff3300';
-		}
+		# my $is_green = 1;
+		# my $color = '#33cc33';
+		# if ( $status =~ /Red/i ) {
+		# 	$is_green = 0;
+		# 	$color = '#ff3300';
+		# }
 
 		if ( $is_anc_tag =~ /Yes/i ) {
 			if ( @datas ) {
 				$html_table_string .= '<tr>';
-				foreach my $x (@datas) {
-					if ( $x =~ /RED|GREEN/i ) {
-						$html_table_string .= '<td style="background-color:'.$color.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
+
+				my $server = '';
+				my @key_cols = split(',', $key_column);
+
+				foreach my $k ( @key_cols ) {
+					$server .= &trim_space($datas[$k-1]);
+					$server .= '@';
+				}
+				$server =~ s/\@$//g;
+				
+				for (my $i = 0; $i < scalar @datas; $i++) {
+					my $x = &trim_space($datas[$i]);
+
+					if ( $color_column - 1 == $i ) {
+						if ( $color_string1 =~ /$x/i ) {
+							$html_table_string .= '<td style="background-color:'.$color_code1.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
+						}
+						elsif ( $color_string2 =~ /$x/i ) {
+							$html_table_string .= '<td style="background-color:'.$color_code2.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';	
+						}
 					}
 					else {
 						$html_table_string .= '<td><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
@@ -115,9 +138,24 @@ if( scalar @$csv_lines ) {
 		else {
 			if ( @datas ) {
 				$html_table_string .= '<tr>';
-				foreach my $x (@datas) {
-					if ( $x =~ /RED|GREEN/i ) {
-						$html_table_string .= '<td style="background-color:'.$color.'">'.$x.'</td>';
+				my $server = '';
+				my @key_cols = split(',', $key_column);
+				foreach my $k ( @key_cols ) {
+					$server .= &trim_space($datas[$k-1]);
+					$server .= '@';
+				}
+				$server =~ s/\@$//g;
+
+				for (my $i = 0; $i < scalar @datas; $i++) {
+					my $x = &trim_space($datas[$i]);
+
+					if ( $color_column - 1 == $i ) {
+						if ( $color_string1 =~ /$x/i ) {
+							$html_table_string .= '<td style="background-color:'.$color_code1.'">'.$x.'</td>';
+						}
+						elsif ( $color_string2 =~ /$x/i ) {
+							$html_table_string .= '<td style="background-color:'.$color_code2.'">'.$x.'</td>';
+						}
 					}
 					else {
 						$html_table_string .= '<td>'.$x.'</td>';

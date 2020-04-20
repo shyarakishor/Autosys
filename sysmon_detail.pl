@@ -35,6 +35,17 @@ print $q->header;
 my $config_file = $q->param('config_file');
 my $server = $q->param('server');
 
+my $search_string = '';
+my @ss = split('@', $server);
+
+for( my $w = 0; $w < scalar @ss; $w++ ) {
+	my $d = @ss[$w];
+	$search_string .= $d;
+	if ( scalar @ss - 1 > $w ) {
+		$search_string .= ".*,\\s*"
+	}
+}
+# print $search_string;
 #################
 # Config Values #
 #################
@@ -46,6 +57,7 @@ my $filedata = LoadFile($CONFIG_FILE);
 my $header_title = $filedata->{header_title};
 my $csv_file     = $filedata->{detail_file};
 my $footer_hash  = $filedata->{footer};
+my $key_column   = $filedata->{key_column};
 
 ####Read CSV File and Collect Lines
 my $csv_lines = [];
@@ -91,7 +103,7 @@ if( scalar @$csv_lines ) {
 
 		my @fields = split(',', $line);
 
-		if ( $fields[0] =~ /$server/i ) {
+		if ( $line =~ /$search_string/i ) {
 			$html_table_string .= '<tr>';
 			foreach my $x (@fields) {
 				$html_table_string .= '<td>'.$x.'</td>'	;
