@@ -58,6 +58,8 @@ my $header_title = $filedata->{header_title};
 my $csv_file     = $filedata->{detail_file};
 my $footer_hash  = $filedata->{footer};
 my $key_column   = $filedata->{key_column};
+my $export_button = $filedata->{export_button};
+my $export_file_name = $filedata->{export_file_name};
 
 ####Read CSV File and Collect Lines
 my $csv_lines = [];
@@ -89,6 +91,11 @@ if ( $header_line !~ /^\s*$/ ) {
 $header_html_string .= '</tr>';
 
 ####Read CSV File and Collect Lines END
+
+my $export_button_html = '';
+if ( $export_button =~ /Yes/i ) {
+	$export_button_html = "<button onclick=exportTableToCSV(\'$export_file_name\')>Export To CSV File</button><br/><br/>";
+}
 
 my $header_fields = $filedata->{'detail_fields'};
 
@@ -153,7 +160,8 @@ print <<BODY;
 <div style='text-align: center;'>
 <p style='margin: 5px 25px 0 25px; color: $footer_hash->{color};font-weight: $footer_hash->{color}; font-size: $footer_hash->{size}'>$header_title</p>
 </div>
-<table align="center">
+$export_button_html
+<table align="center" id="detail_table">
   <tr>
     <th>$header_fields->{'field1'}</th>
     <th>$header_fields->{'field2'}</th>
@@ -165,11 +173,61 @@ print <<BODY;
   $html_table_string
 </table>
 </body>
+BODY
+;
+
+print <<FOOTER;
 <footer>
 <div style='text-align: center;'>
 <p style='margin: 5px 25px 0 25px; color: $footer_hash->{color};font-weight: $footer_hash->{color}; font-size: $footer_hash->{size}'>$footer_hash->{text}</p>
 </div>
 </footer>
+
+<script>
+function exportTableToCSV(filename) {
+    var csv = [];
+    var rows = document.querySelectorAll("table tr");
+    
+    for (var i = 0; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll("td, th");
+        
+        for (var j = 0; j < cols.length; j++) 
+            row.push(cols[j].innerText);
+        
+        csv.push(row.join(","));        
+    }
+
+    // Download CSV file
+    downloadCSV(csv.join("\\n"), filename);
+}
+function downloadCSV(csv, filename) {
+    var csvFile;
+    var downloadLink;
+
+    // CSV file
+    csvFile = new Blob([csv], {type: "text/csv"});
+
+    // Download link
+    downloadLink = document.createElement("a");
+
+    // File name
+    downloadLink.download = filename;
+
+    // Create a link to the file
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+
+    // Hide download link
+    downloadLink.style.display = "none";
+
+    // Add the link to DOM
+    document.body.appendChild(downloadLink);
+
+    // Click download link
+    downloadLink.click();
+}
+</script>
 </html>
-BODY
+FOOTER
 ;
+
+

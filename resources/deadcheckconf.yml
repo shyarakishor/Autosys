@@ -2,13 +2,14 @@
 header_title: Title
 summary_file: /home/dell/Work/mohan/Autosys/CSV/autosys_summary.csv
 detail_file: /home/dell/Work/mohan/Autosys/CSV/autosys_details.csv
-color_column: 2
-color_string1: GREEN
-color_code1: YELLOW
-color_string2: RED
-color_code2: ORANGE
+color_column: 1,4
+color_code: PINK, PINK
+color_string: SYBAMR_FDA_PRD_DS03,T2,T3,T4
+color_string_code: PURPLE, RED, BLUE, GREEN
 key_column: 1
 anchor_tag: "Yes"
+export_button: "Yes"
+export_file_name: data.csv
 footer:
   text: "Footer"
   style: bold

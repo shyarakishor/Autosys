@@ -47,11 +47,35 @@ my $csv_file      = $filedata->{summary_file};
 my $footer_hash   = $filedata->{footer};
 my $is_anc_tag    = $filedata->{anchor_tag};
 my $color_column  = $filedata->{color_column};
-my $color_string1 = $filedata->{color_string1};
-my $color_code1   = $filedata->{color_code1};
-my $color_string2 = $filedata->{color_string2};
-my $color_code2   = $filedata->{color_code2};
+my $color_code    = $filedata->{color_code};
+my $color_string = $filedata->{color_string};
+my $color_string_code   = $filedata->{color_string_code};
 my $key_column    = $filedata->{key_column};
+
+###split column and color
+my @ccol = split(',', $color_column);
+my @ccod = split(',', $color_code);
+
+my $color_code_hash = {};
+if ( scalar @ccol ) {
+	for( my $i = 0; $i < scalar @ccol; $i++ ) {
+		my $val = &trim_space($ccod[$i]);
+		$color_code_hash->{$ccol[$i]-1} = $val;
+	}
+}
+
+my @cstr = split(',', $color_string);
+my @cstrcod = split(',', $color_string_code);
+
+my $color_string_code_hash = {};
+if ( scalar @cstr ) {
+	for( my $i = 0; $i < scalar @cstr; $i++ ) {
+		my $key = &trim_space($cstr[$i]);
+		my $val = &trim_space($cstrcod[$i]);
+		$color_string_code_hash->{$key} = $val;
+	}
+}
+
 
 ####Read CSV File and Collect Lines
 my $csv_lines = [];
@@ -94,16 +118,6 @@ if( scalar @$csv_lines ) {
 
 		my @datas = split(',', $line);
 
-		# my $server = $datas[0];
-		# my $status = $datas[1];
-
-		# my $is_green = 1;
-		# my $color = '#33cc33';
-		# if ( $status =~ /Red/i ) {
-		# 	$is_green = 0;
-		# 	$color = '#ff3300';
-		# }
-
 		if ( $is_anc_tag =~ /Yes/i ) {
 			if ( @datas ) {
 				$html_table_string .= '<tr>';
@@ -120,16 +134,16 @@ if( scalar @$csv_lines ) {
 				for (my $i = 0; $i < scalar @datas; $i++) {
 					my $x = &trim_space($datas[$i]);
 
-					if ( $color_column - 1 == $i ) {
-						if ( $color_string1 =~ /$x/i ) {
-							$html_table_string .= '<td style="background-color:'.$color_code1.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
-						}
-						elsif ( $color_string2 =~ /$x/i ) {
-							$html_table_string .= '<td style="background-color:'.$color_code2.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';	
+					if ( exists $color_code_hash->{$i} ) {
+						my $color = '';
+						if ( exists $color_string_code_hash->{$x} ) {
+							$color = $color_string_code_hash->{$x};
 						}
 						else {
-							$html_table_string .= '<td><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';		
+							$color = $color_code_hash->{$i};	
 						}
+
+						$html_table_string .= '<td style="background-color:'.$color.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
 					}
 					else {
 						$html_table_string .= '<td><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
@@ -152,16 +166,15 @@ if( scalar @$csv_lines ) {
 				for (my $i = 0; $i < scalar @datas; $i++) {
 					my $x = &trim_space($datas[$i]);
 
-					if ( $color_column - 1 == $i ) {
-						if ( $color_string1 =~ /$x/i ) {
-							$html_table_string .= '<td style="background-color:'.$color_code1.'">'.$x.'</td>';
-						}
-						elsif ( $color_string2 =~ /$x/i ) {
-							$html_table_string .= '<td style="background-color:'.$color_code2.'">'.$x.'</td>';
+					if ( exists $color_code_hash->{$i} ) {
+						my $color = '';
+						if ( exists $color_string_code_hash->{$x} ) {
+							$color = $color_string_code_hash->{$x};
 						}
 						else {
-							$html_table_string .= '<td>'.$x.'</td>';	
+							$color = $color_code_hash->{$i};	
 						}
+						$html_table_string .= '<td style="background-color:'.$color.'">'.$x.'</td>';
 					}
 					else {
 						$html_table_string .= '<td>'.$x.'</td>';
