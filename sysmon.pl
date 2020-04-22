@@ -127,6 +127,9 @@ if( scalar @$csv_lines ) {
 						elsif ( $color_string2 =~ /$x/i ) {
 							$html_table_string .= '<td style="background-color:'.$color_code2.'"><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';	
 						}
+						else {
+							$html_table_string .= '<td><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';		
+						}
 					}
 					else {
 						$html_table_string .= '<td><a href="sysmon_detail.pl?config_file='.$config_file.'&server='.$server.'" target="_blank">'.$x.'</a></td>';
@@ -155,6 +158,9 @@ if( scalar @$csv_lines ) {
 						}
 						elsif ( $color_string2 =~ /$x/i ) {
 							$html_table_string .= '<td style="background-color:'.$color_code2.'">'.$x.'</td>';
+						}
+						else {
+							$html_table_string .= '<td>'.$x.'</td>';	
 						}
 					}
 					else {
