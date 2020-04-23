@@ -58,8 +58,8 @@ my $header_title = $filedata->{header_title};
 my $csv_file     = $filedata->{detail_file};
 my $footer_hash  = $filedata->{footer};
 my $key_column   = $filedata->{key_column};
-my $export_button = $filedata->{export_button};
-my $export_file_name = $filedata->{export_file_name};
+my $export_button = $filedata->{detail_export_button};
+my $export_file_name = $filedata->{detail_export_file_name};
 
 ####Read CSV File and Collect Lines
 my $csv_lines = [];

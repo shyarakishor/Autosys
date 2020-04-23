@@ -51,8 +51,8 @@ my $color_code    = $filedata->{color_code};
 my $color_string = $filedata->{color_string};
 my $color_string_code   = $filedata->{color_string_code};
 my $key_column    = $filedata->{key_column};
-my $export_button = $filedata->{export_button};
-my $export_file_name = $filedata->{export_file_name};
+my $export_button = $filedata->{summary_export_button};
+my $export_file_name = $filedata->{summary_export_file_name};
 
 ###split column and color
 my @ccol = split(',', $color_column);

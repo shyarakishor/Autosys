@@ -8,8 +8,10 @@ color_string: SYBAMR_FDA_PRD_DS03,T2,T3,T4
 color_string_code: PURPLE, RED, BLUE, GREEN
 key_column: 1
 anchor_tag: "Yes"
-export_button: "Yes"
-export_file_name: data.csv
+summary_export_button: "Yes"
+summary_export_file_name: data.txt
+detail_export_button: "Yes"
+detail_export_file_name: detail.csv
 footer:
   text: "Footer"
   style: bold
