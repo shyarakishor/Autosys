@@ -98,7 +98,7 @@ else {
 
 my $export_button_html = '';
 if ( $export_button =~ /Yes/i ) {
-	$export_button_html = "<button onclick=exportTableToCSV(\'$export_file_name\')>Export To CSV File</button><br/><br/>";
+	$export_button_html = "<button id='export_file'>Export To CSV File</button><br/><br/>";
 }
 
 ##header dynamic
@@ -248,6 +248,9 @@ print <<FOOTER;
 
 
 <script>
+document.getElementById("export_file").addEventListener("click", function() {
+  exportTableToCSV("$export_file_name")
+});
 function exportTableToCSV(filename) {
     var csv = [];
     var rows = document.querySelectorAll("table tr");
