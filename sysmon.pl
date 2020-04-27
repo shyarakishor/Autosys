@@ -30,8 +30,6 @@ my $VERSION = "1.0.0";
 
 my $q = new CGI;
 
-print $q->header;
-
 my $config_file = $q->param('config_file');
 
 #################
@@ -80,6 +78,7 @@ if ( scalar @cstr ) {
 
 
 ####Read CSV File and Collect Lines
+my $final_data_array = [];
 my $csv_lines = [];
 my $header_line = '';
 my $fh = FileHandle->new;
@@ -90,15 +89,16 @@ if ( $fh->open("< $csv_file") ) {
 		push @$csv_lines, $line;
 	}
 	$fh->close;
+	$header_line =~ s/\r|\n//g;
+	push @$final_data_array, $header_line;
 } 
 else {
-	print "Cannot open $csv_file"; 
-	die;
+	die "Cannot open $csv_file"; 
 }
 
 my $export_button_html = '';
 if ( $export_button =~ /Yes/i ) {
-	$export_button_html = "<button id='export_file'>Export To CSV File</button><br/><br/>";
+	$export_button_html = "<a href='sysmon.pl?config_file=".$config_file."&action=export'>Export To CSV File</a><br/><br/>";
 }
 
 ##header dynamic
@@ -115,8 +115,8 @@ $header_html_string .= '</tr>';
 
 ####Read CSV File and Collect Lines END
 ##start read and prepare Graph
-my $final_data_array = [];
 my $html_table_string = '';
+
 if( scalar @$csv_lines ) {
 	foreach my $line ( @$csv_lines ) {
 		$line = &trim_space( $line );
@@ -191,7 +191,23 @@ if( scalar @$csv_lines ) {
 			}
 			# $html_table_string .= '<tr><td>'.$server.'</td><td style="background-color:'.$color.'">'.$status.'</a></td></tr>';	
 		}
+
+		push @$final_data_array, $line;
 	}
+}
+
+my $action = $q->param('action');
+if ( $action =~ /export/ ) {
+	print "Content-Type:application/x-download\n";
+	print "Content-Disposition:attachment;filename=$export_file_name\n\n";
+	for my $line (@$final_data_array) {
+		print $line;
+		print "\r\n";
+	}
+	exit;
+}
+else {
+	print $q->header;
 }
 
 ##trim
@@ -245,54 +261,6 @@ print <<FOOTER;
 <div style='text-align: center;'>
 <p style='margin: 5px 25px 0 25px; color: $footer_hash->{color};font-weight: $footer_hash->{color}; font-size: $footer_hash->{size}'>$footer_hash->{text}</p>
 </div>
-
-
-<script>
-document.getElementById("export_file").addEventListener("click", function() {
-  exportTableToCSV("$export_file_name")
-});
-function exportTableToCSV(filename) {
-    var csv = [];
-    var rows = document.querySelectorAll("table tr");
-    
-    for (var i = 0; i < rows.length; i++) {
-        var row = [], cols = rows[i].querySelectorAll("td, th");
-        
-        for (var j = 0; j < cols.length; j++) 
-            row.push(cols[j].innerText);
-        
-        csv.push(row.join(","));        
-    }
-
-    // Download CSV file
-    downloadCSV(csv.join("\\n"), filename);
-}
-function downloadCSV(csv, filename) {
-    var csvFile;
-    var downloadLink;
-
-    // CSV file
-    csvFile = new Blob([csv], {type: "text/csv"});
-
-    // Download link
-    downloadLink = document.createElement("a");
-
-    // File name
-    downloadLink.download = filename;
-
-    // Create a link to the file
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-
-    // Hide download link
-    downloadLink.style.display = "none";
-
-    // Add the link to DOM
-    document.body.appendChild(downloadLink);
-
-    // Click download link
-    downloadLink.click();
-}
-</script>
 
 </footer>
 </html>

@@ -30,10 +30,9 @@ my $VERSION = "1.0.0";
 
 my $q = new CGI;
 
-print $q->header;
-
 my $config_file = $q->param('config_file');
 my $server = $q->param('server');
+my $action = $q->param('action');
 
 my $search_string = '';
 my @ss = split('@', $server);
@@ -62,6 +61,7 @@ my $export_button = $filedata->{detail_export_button};
 my $export_file_name = $filedata->{detail_export_file_name};
 
 ####Read CSV File and Collect Lines
+my $final_data_array = [];
 my $csv_lines = [];
 my $header_line = '';
 my $fh = FileHandle->new;
@@ -72,10 +72,11 @@ if ( $fh->open("< $csv_file") ) {
 		push @$csv_lines, $line;
 	}
 	$fh->close;
+  $header_line =~ s/\r|\n//g;
+  push @$final_data_array, $header_line;
 } 
 else {
-	print "Cannot open $csv_file"; 
-	die;
+	die "Cannot open $csv_file"; 
 }
 
 ##header dynamic
@@ -91,10 +92,9 @@ if ( $header_line !~ /^\s*$/ ) {
 $header_html_string .= '</tr>';
 
 ####Read CSV File and Collect Lines END
-
 my $export_button_html = '';
 if ( $export_button =~ /Yes/i ) {
-	$export_button_html = "<button onclick=exportTableToCSV(\'$export_file_name\')>Export To CSV File</button><br/><br/>";
+  $export_button_html = "<a href='sysmon_detail.pl?config_file=".$config_file."&server=".$server."&action=export'>Export To CSV File</a><br/><br/>";
 }
 
 my $header_fields = $filedata->{'detail_fields'};
@@ -116,8 +116,22 @@ if( scalar @$csv_lines ) {
 				$html_table_string .= '<td>'.$x.'</td>'	;
 			}
 			$html_table_string .= '</tr>';
+      push @$final_data_array, $line;
 		}
 	}
+}
+
+if ( $action =~ /export/ ) {
+  print "Content-Type:application/x-download\n";
+  print "Content-Disposition:attachment;filename=$export_file_name\n\n";
+  for my $line (@$final_data_array) {
+    print $line;
+    print "\r\n";
+  }
+  exit;
+}
+else {
+  print $q->header;
 }
 
 ##trim
@@ -183,49 +197,6 @@ print <<FOOTER;
 </div>
 </footer>
 
-<script>
-function exportTableToCSV(filename) {
-    var csv = [];
-    var rows = document.querySelectorAll("table tr");
-    
-    for (var i = 0; i < rows.length; i++) {
-        var row = [], cols = rows[i].querySelectorAll("td, th");
-        
-        for (var j = 0; j < cols.length; j++) 
-            row.push(cols[j].innerText);
-        
-        csv.push(row.join(","));        
-    }
-
-    // Download CSV file
-    downloadCSV(csv.join("\\n"), filename);
-}
-function downloadCSV(csv, filename) {
-    var csvFile;
-    var downloadLink;
-
-    // CSV file
-    csvFile = new Blob([csv], {type: "text/csv"});
-
-    // Download link
-    downloadLink = document.createElement("a");
-
-    // File name
-    downloadLink.download = filename;
-
-    // Create a link to the file
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-
-    // Hide download link
-    downloadLink.style.display = "none";
-
-    // Add the link to DOM
-    document.body.appendChild(downloadLink);
-
-    // Click download link
-    downloadLink.click();
-}
-</script>
 </html>
 FOOTER
 ;
