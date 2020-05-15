@@ -59,6 +59,7 @@ my $footer_hash  = $filedata->{footer};
 my $key_column   = $filedata->{key_column};
 my $export_button = $filedata->{detail_export_button};
 my $export_file_name = $filedata->{detail_export_file_name};
+my $detail_delimiter = $filedata->{detail_delimiter};
 
 ####Read CSV File and Collect Lines
 my $final_data_array = [];
@@ -82,7 +83,7 @@ else {
 ##header dynamic
 my $header_html_string = '<tr>';
 if ( $header_line !~ /^\s*$/ ) {
-	my @headers = split(',', $header_line);
+	my @headers = split($detail_delimiter, $header_line);
 	if ( @headers ) {
 		foreach ( @headers ) {
 			$header_html_string .= '<th>'.$_.'</th>';
@@ -108,7 +109,7 @@ if( scalar @$csv_lines ) {
 		$line =~ s/\r|\n//g;
 		next if $line =~ /^\s*$/;
 
-		my @fields = split(',', $line);
+		my @fields = split($detail_delimiter, $line);
 
 		if ( $line =~ /$search_string/i ) {
 			$html_table_string .= '<tr>';
@@ -116,7 +117,7 @@ if( scalar @$csv_lines ) {
 				$html_table_string .= '<td>'.$x.'</td>'	;
 			}
 			$html_table_string .= '</tr>';
-      push @$final_data_array, $line;
+      		push @$final_data_array, $line;
 		}
 	}
 }

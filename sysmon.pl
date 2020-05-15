@@ -51,6 +51,7 @@ my $color_string_code   = $filedata->{color_string_code};
 my $key_column    = $filedata->{key_column};
 my $export_button = $filedata->{summary_export_button};
 my $export_file_name = $filedata->{summary_export_file_name};
+my $summary_delimiter = $filedata->{summary_delimiter};
 
 ###split column and color
 my @ccol = split(',', $color_column);
@@ -104,7 +105,7 @@ if ( $export_button =~ /Yes/i ) {
 ##header dynamic
 my $header_html_string = '<tr>';
 if ( $header_line !~ /^\s*$/ ) {
-	my @headers = split(',', $header_line);
+	my @headers = split($summary_delimiter, $header_line);
 	if ( @headers ) {
 		foreach ( @headers ) {
 			$header_html_string .= '<th>'.$_.'</th>';
@@ -123,7 +124,7 @@ if( scalar @$csv_lines ) {
 		$line =~ s/\r|\n//g;
 		next if $line =~ /^\s*$/;
 
-		my @datas = split(',', $line);
+		my @datas = split($summary_delimiter, $line);
 
 		if ( $is_anc_tag =~ /Yes/i ) {
 			if ( @datas ) {

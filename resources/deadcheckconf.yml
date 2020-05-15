@@ -12,6 +12,8 @@ summary_export_button: "Yes"
 summary_export_file_name: data.txt
 detail_export_button: "Yes"
 detail_export_file_name: detail.csv
+summary_delimiter: ","
+detail_delimiter: ","
 footer:
   text: "Footer"
   style: bold
